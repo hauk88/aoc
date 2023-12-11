@@ -1,40 +1,21 @@
 use std::collections::HashMap;
 
-struct Interval {
-    a: i64,
-    b: i64,
-}
-
-struct Mapping {
-    target: Interval,
-    source: Interval,
-}
-
-impl Interval{
-    fn 
-}
-
 pub fn part2() {
     let content = std::fs::read_to_string("longp1.txt").expect("error");
 
-    let mut maps: HashMap<&str, Vec<Mapping>> = HashMap::new();
-    let mut seeds: Vec<Interval> = Vec::new();
+    let mut maps: HashMap<&str, Vec<Vec<i64>>> = HashMap::new();
+    let mut seeds: Vec<i64> = Vec::new();
 
     let mut current_map_name = "";
 
     for line in content.lines() {
         if line.starts_with("seeds") {
             let seeds_str = line.split(":").collect::<Vec<&str>>()[1].trim();
-            let seed_nums = seeds_str
-                .split_white()
-                .map(|x| x.parse::<i64>().unwrap())
-                .collect::<Vec<i64>>();
-
-            for i in 0..seed_nums.len() / 2 {
-                seeds.push(Interval {
-                    a: seed_nums[2 * i],
-                    b: seed_nums[2 * i + 1],
-                });
+            for seed in seeds_str.split(" ") {
+                if seed == "" {
+                    continue;
+                }
+                seeds.push(seed.trim().parse::<i64>().unwrap());
             }
             continue;
         }
@@ -52,17 +33,7 @@ pub fn part2() {
             .split(" ")
             .map(|x| x.parse::<i64>().unwrap())
             .collect::<Vec<i64>>();
-        let mapping = Mapping {
-            target: Interval {
-                a: row[0],
-                b: row[2],
-            },
-            source: Interval {
-                a: row[1],
-                b: row[2],
-            },
-        };
-        maps.get_mut(current_map_name).unwrap().push(mapping);
+        maps.get_mut(current_map_name).unwrap().push(row);
     }
 
     let mut map_stack: Vec<&str> = Vec::new();
@@ -78,22 +49,34 @@ pub fn part2() {
         }
     }
 
-    let mut locs: Vec<i64> = Vec::new();
-    for seed in seeds {
-        let mut current_intervals = vec![seed];
-        for map in map_stack.iter().rev() {
+    let mut location = 0;
+    loop {
+        if location % 100000 == 0 {
+            println!("{}", location);
+        }
+
+        let mut current_value = location;
+        for map in map_stack.iter() {
             let mappings = maps.get(map).unwrap();
             for mapping in mappings {
-
-
-                if mapping[1] <= current_value && current_value <= mapping[1] + mapping[2] {
-                    current_value = mapping[0] + current_value - mapping[1];
+                if mapping[0] <= current_value && current_value <= mapping[0] + mapping[2] {
+                    current_value = mapping[1] + current_value - mapping[0];
                     break;
                 }
             }
         }
-        locs.push(current_value);
+        let mut seed_found = false;
+        for seed_range in seeds.chunks(2) {
+            if seed_range[0] <= current_value && current_value <= seed_range[0] + seed_range[1] {
+                seed_found = true;
+                break;
+            }
+        }
+        if seed_found {
+            break;
+        }
+        location += 1;
     }
 
-    println!("{:?}", locs.iter().min());
+    println!("Res: {:?}", location)
 }

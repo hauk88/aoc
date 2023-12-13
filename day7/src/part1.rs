@@ -1,5 +1,7 @@
+use std::{cmp::Ordering, collections::HashMap};
+
 // Make enum of types of hands
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Debug, Ord, PartialOrd, Eq, PartialEq)]
 enum Hand {
     Hc,
     OnePair,
@@ -15,6 +17,40 @@ struct Bid {
     hand: String,
     value: i32,
     hand_type: Hand,
+}
+
+impl Bid {
+    fn compare(&self, other: &Bid) -> Ordering {
+        let a = self.hand_type.cmp(&other.hand_type);
+        let mut card_to_value: HashMap<char, i32> = HashMap::new();
+        card_to_value.insert('2', 2);
+        card_to_value.insert('3', 3);
+        card_to_value.insert('4', 4);
+        card_to_value.insert('5', 5);
+        card_to_value.insert('6', 6);
+        card_to_value.insert('7', 7);
+        card_to_value.insert('8', 8);
+        card_to_value.insert('9', 9);
+        card_to_value.insert('T', 10);
+        card_to_value.insert('J', 11);
+        card_to_value.insert('Q', 12);
+        card_to_value.insert('K', 13);
+        card_to_value.insert('A', 14);
+
+        if a.is_eq() {
+            let self_cards = self.hand.chars().collect::<Vec<char>>();
+            let other_cards = other.hand.chars().collect::<Vec<char>>();
+            for i in 0..self_cards.len() {
+                let self_value = card_to_value.get(&self_cards[i]).unwrap();
+                let other_value = card_to_value.get(&other_cards[i]).unwrap();
+                let cmp = self_value.cmp(&other_value);
+                if cmp.is_ne() {
+                    return cmp;
+                }
+            }
+        }
+        return a;
+    }
 }
 
 fn parse_hand(hand: String) -> Hand {
@@ -56,7 +92,7 @@ fn parse_hand(hand: String) -> Hand {
 
 pub fn part1() {
     // read file
-    let content = std::fs::read_to_string("shortp1.txt").expect("Error");
+    let content = std::fs::read_to_string("longp1.txt").expect("Error");
     let mut bids: Vec<Bid> = Vec::new();
     for line in content.lines() {
         let mut bid = Bid {
@@ -71,6 +107,13 @@ pub fn part1() {
         bids.push(bid);
     }
 
-    bids.sort_by(|a, b| b.hand_type < a.hand_type);
-    println!("{:?}", bids);
+    // sort bid by hand type
+    bids.sort_by(|a, b| a.compare(b));
+
+    let mut res = 0;
+    for (idx, bid) in bids.iter().enumerate() {
+        res += bid.value * ((idx as i32) + 1);
+    }
+
+    println!("{:?}", res);
 }

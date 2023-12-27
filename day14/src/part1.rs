@@ -21,19 +21,19 @@ pub fn part1() {
         let mut stop_idx = -1;
         for i in 0..n {
             let t = &platform[i][j];
-            let i32 = i as i32;
+            let idx = i as i32;
             match t {
                 Tile::Stopper => {
-                    stop_idx = i32;
+                    stop_idx = idx;
                 }
                 Tile::Bolder => {
-                    assert!(stop_idx < i32);
-                    if i32 == stop_idx + 1 {
-                        stop_idx = i32;
+                    assert!(stop_idx < idx);
+                    if idx == stop_idx + 1 {
+                        stop_idx = idx;
                     } else {
                         platform[i][j] = Tile::Empty;
-                        platform[(stop_idx + 1) as usize][j] = Tile::Bolder;
                         stop_idx += 1;
+                        platform[(stop_idx) as usize][j] = Tile::Bolder;
                     }
                 }
                 _ => {}

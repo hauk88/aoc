@@ -25,6 +25,9 @@ fn check_numbers(numbers: Vec<i32>) -> bool {
         if d.signum() != sign {
             return false;
         }
+        if d.abs() == 0 {
+            return false;
+        }
         if d.abs() > 3 {
             return false;
         }

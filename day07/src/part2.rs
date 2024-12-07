@@ -1,6 +1,6 @@
 use std::fs;
 
-pub fn part1() {
+pub fn part2() {
     let cont = fs::read_to_string("largep1.txt").unwrap();
 
     let mut input: Vec<(i64, Vec<i64>)> = Vec::new();
@@ -39,5 +39,12 @@ fn can_reach_target(target: i64, nums: Vec<i64>) -> bool {
     let mut mul_nums = nums_c.clone();
     mul_nums[0] = mul_nums[0] * first;
 
-    return can_reach_target(target, add_nums) || can_reach_target(target, mul_nums);
+    let mut cat_nums = nums_c.clone();
+    let mut new_num = first.to_string();
+    new_num.push_str(&cat_nums[0].to_string());
+    cat_nums[0] = new_num.parse().unwrap();
+
+    return can_reach_target(target, add_nums)
+        || can_reach_target(target, mul_nums)
+        || can_reach_target(target, cat_nums);
 }

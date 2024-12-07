@@ -1,5 +1,33 @@
 use std::{collections::HashSet, fs};
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+}
+
+impl Direction {
+    fn turn_right(self) -> Direction {
+        match self {
+            Direction::Up => Direction::Right,
+            Direction::Right => Direction::Down,
+            Direction::Down => Direction::Left,
+            Direction::Left => Direction::Up,
+        }
+    }
+
+    fn to_tuple(self) -> (i32, i32) {
+        match self {
+            Direction::Up => (-1, 0),
+            Direction::Down => (1, 0),
+            Direction::Left => (0, -1),
+            Direction::Right => (0, 1),
+        }
+    }
+}
+
 pub fn part1() {
     let cont = fs::read_to_string("largep1.txt").unwrap();
     let mut map: HashSet<(i32, i32)> = HashSet::new();
@@ -18,27 +46,25 @@ pub fn part1() {
             m = j as i32;
         });
     });
+
     let mut visited: HashSet<(i32, i32)> = HashSet::new();
-    let mut direction = (-1, 0);
+    let mut direction = Direction::Up;
 
     loop {
         visited.insert(current);
-        let next = (current.0 + direction.0, current.1 + direction.1);
+
+        let next = (
+            current.0 + direction.to_tuple().0,
+            current.1 + direction.to_tuple().1,
+        );
         if next.0 < 0 || next.1 < 0 || next.0 > n || next.1 > m {
             break;
         }
         if map.contains(&next) {
-            direction = match direction {
-                (-1, 0) => (0, 1),
-                (0, 1) => (1, 0),
-                (1, 0) => (0, -1),
-                (0, -1) => (-1, 0),
-                _ => panic!("no dir"),
-            }
+            direction = direction.turn_right();
         } else {
             current = next;
         }
     }
-
     println!("{}", visited.len());
 }

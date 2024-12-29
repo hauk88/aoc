@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-#[derive(Eq, PartialEq, Clone, Debug)]
+#[derive(Eq, PartialEq, Clone, Debug, Hash)]
 enum Direction {
     North,
     South,
@@ -39,11 +39,16 @@ pub fn part1() {
 
     let mut queue: Vec<(i32, i32, Direction, u32)> = Vec::new();
     queue.push((start.0, start.1, Direction::East, 0));
+    let mut visited: HashSet<(i32, i32, Direction)> = HashSet::new();
     let res = loop {
         if queue.is_empty() {
             break 0;
         }
         let (i, j, dir, c) = queue.remove(0);
+        if visited.contains(&(i, j, dir.clone())) {
+            continue;
+        }
+        visited.insert((i, j, dir.clone()));
         if (i, j) == end {
             break c;
         }

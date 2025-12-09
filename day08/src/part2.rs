@@ -26,34 +26,39 @@ pub fn part2() {
     let mut res: f32 = 0.0;
 
     for (i, j, _) in distances.iter() {
-        let mut i_cluster_idx: i32 = -1;
-        let mut j_cluster_idx: i32 = -1;
+        let mut i_cluster_idx: Option<usize> = None;
+        let mut j_cluster_idx: Option<usize> = None;
         clusters.iter().enumerate().for_each(|(idx, c)| {
             if c.contains(&i) {
-                i_cluster_idx = idx as i32;
+                i_cluster_idx = Some(idx);
             }
             if c.contains(&j) {
-                j_cluster_idx = idx as i32;
+                j_cluster_idx = Some(idx);
             }
         });
 
-        if i_cluster_idx > -1 && j_cluster_idx > -1 {
-            if i_cluster_idx != j_cluster_idx {
-                let keep_idx = i_cluster_idx.min(j_cluster_idx);
-                let remove_idx = i_cluster_idx.max(j_cluster_idx);
-                let r_cluster = clusters.remove(remove_idx as usize);
-                clusters[keep_idx as usize].extend(r_cluster);
+        match (i_cluster_idx, j_cluster_idx) {
+            (Some(i_idx), Some(j_idx)) => {
+                if i_idx != j_idx {
+                    let keep_idx = i_idx.min(j_idx);
+                    let remove_idx = i_idx.max(j_idx);
+
+                    let removed_cluster = clusters.remove(remove_idx);
+                    clusters[keep_idx].extend(removed_cluster);
+                }
             }
-            continue;
-        } else if i_cluster_idx == -1 && j_cluster_idx == -1 {
-            let mut new_cluster: HashSet<usize> = HashSet::new();
-            new_cluster.insert(*i);
-            new_cluster.insert(*j);
-            clusters.push(new_cluster);
-        } else if i_cluster_idx > -1 {
-            clusters[i_cluster_idx as usize].insert(*j);
-        } else if j_cluster_idx > -1 {
-            clusters[j_cluster_idx as usize].insert(*i);
+            (None, None) => {
+                let mut new_cluster: HashSet<usize> = HashSet::new();
+                new_cluster.insert(*i);
+                new_cluster.insert(*j);
+                clusters.push(new_cluster);
+            }
+            (Some(i_idx), None) => {
+                clusters[i_idx].insert(*j);
+            }
+            (None, Some(j_idx)) => {
+                clusters[j_idx].insert(*i);
+            }
         }
 
         if clusters.len() == 1 && clusters[0].len() == n {
